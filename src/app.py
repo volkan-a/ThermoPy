@@ -1,12 +1,12 @@
-'''
+"""
  # @ Create Time: 2023-10-03 18:28:47.423965
-'''
+"""
 
-from dash import Dash, callback, Input, Output, State
+from dash import Dash, callback, Input, Output, State, html
 import dash_mantine_components as dmc
+from CoolProp.CoolProp import PropsSI
 import CoolProp as cp
-from numpy.random import randint
-from dash_iconify import DashIconify
+
 
 FLUIDS = cp.__fluids__
 PROPERTIES = [
@@ -19,7 +19,17 @@ PROPERTIES = [
     {"value": "Q", "label": "Quality"},
 ]
 
-toto = randint(0, 20)
+header = [
+    html.Thead(
+        html.Tr(
+            [
+                html.Th("Property"),
+                html.Th("Value"),
+                html.Th("Unit"),
+            ]
+        )
+    )
+]
 
 app = Dash(__name__, title="ThermoPy")
 
@@ -75,7 +85,6 @@ app.layout = dmc.Center(
                     children=dmc.Button("Calculate", size="xs", id="calculate-button"),
                 ),
                 dmc.Text(id="result", size="sm"),
-                dmc.Text(f"toto = {toto}", size="sm"),
             ]
         )
     ],
@@ -91,9 +100,25 @@ app.layout = dmc.Center(
     State("prop2-select", "value"),
     State("prop2-value", "value"),
 )
-def update_text(n_clicks, fluid, prop1, value1, prop2, value2):
+def update_text(
+    n_clicks, fluid: str, prop1: str, value1: float, prop2: str, value2: float
+):
     """Update text based on checkbox"""
-    return f'PropsSI("{prop1}", "{prop1}", {value1}, "{prop2}", {value2}, "{fluid}")'
+    temperature = PropsSI("T", prop1, value1, prop2, value2, fluid)
+    pressure = PropsSI("P", prop1, value1, prop2, value2, fluid)
+    density = PropsSI("D", prop1, value1, prop2, value2, fluid)
+    enthalpy = PropsSI("H", prop1, value1, prop2, value2, fluid)
+    entropy = PropsSI("S", prop1, value1, prop2, value2, fluid)
+    vapor_fraction = PropsSI("Q", prop1, value1, prop2, value2, fluid)
+
+    row1 = html.Tr([html.Td("Temperature"), html.Td(temperature), html.Td("K")])
+    row2 = html.Tr([html.Td("Pressure"), html.Td(pressure), html.Td("Pa")])
+    row3 = html.Tr([html.Td("Density"), html.Td(density), html.Td("kg/m^3")])
+    row4 = html.Tr([html.Td("Enthalpy"), html.Td(enthalpy), html.Td("J/kg")])
+    row5 = html.Tr([html.Td("Entropy"), html.Td(entropy), html.Td("J/kg/K")])
+    row6 = html.Tr([html.Td("Vapor fraction"), html.Td(vapor_fraction), html.Td("")])
+    body = [html.Tbody([row1, row2, row3, row4, row5, row6])]
+    return dmc.Table(header + body)
 
 
 if __name__ == "__main__":
