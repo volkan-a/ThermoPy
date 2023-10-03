@@ -1,0 +1,8 @@
+CoolProp==6.5.0.post1
+dash==2.13.0
+dash_iconify==0.1.2
+dash_mantine_components==0.10.2
+numpy==1.26.0
+gunicorn
+pandas
+dash-tools
